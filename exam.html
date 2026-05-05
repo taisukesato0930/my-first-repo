@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基本情報技術者試験 模擬試験</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      max-width: 720px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 18px; font-weight: 700; }
+    .progress-text { font-size: 14px; opacity: 0.85; }
+    .progress-bar-wrap {
+      background: #1d4ed8;
+      height: 6px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #60a5fa;
+      transition: width 0.4s ease;
+    }
+    .score-bar {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 28px;
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .score-bar span { font-weight: 600; }
+    .correct-count { color: #16a34a; }
+    .wrong-count { color: #dc2626; }
+    .body { padding: 32px 28px; }
+    .subject-badge {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .question-num {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #1e293b;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 12px 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th { background: #f8fafc; color: #475569; font-weight: 600; }
+    .choices { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .choice-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 15px;
+      color: #1e293b;
+      text-align: left;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+    .choice-btn .label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #2563eb;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .choice-btn:hover:not(:disabled) .label {
+      background: #2563eb;
+      color: white;
+    }
+    .choice-btn.correct {
+      border-color: #16a34a;
+      background: #f0fdf4;
+    }
+    .choice-btn.correct .label {
+      background: #16a34a;
+      color: white;
+    }
+    .choice-btn.wrong {
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+    .choice-btn.wrong .label {
+      background: #dc2626;
+      color: white;
+    }
+    .choice-btn.reveal {
+      border-color: #16a34a;
+      background: #f0fdf4;
+    }
+    .choice-btn.reveal .label {
+      background: #16a34a;
+      color: white;
+    }
+    .choice-btn:disabled { cursor: default; }
+    .feedback {
+      display: none;
+      margin-top: 20px;
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .feedback.correct {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .feedback.wrong {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .feedback-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .feedback table { margin: 8px 0; font-size: 13px; }
+    .feedback th { background: rgba(0,0,0,0.04); }
+    .next-btn {
+      display: none;
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .next-btn:hover { background: #1d4ed8; }
+    .result-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 28px;
+    }
+    .result-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .result-circle.pass {
+      background: #f0fdf4;
+      border: 6px solid #16a34a;
+      color: #16a34a;
+    }
+    .result-circle.fail {
+      background: #fef2f2;
+      border: 6px solid #dc2626;
+      color: #dc2626;
+    }
+    .result-circle .big { font-size: 36px; }
+    .result-circle .small { font-size: 13px; }
+    .result-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+    .result-sub { font-size: 14px; color: #64748b; margin-bottom: 28px; }
+    .result-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+    .result-table th, .result-table td {
+      border: 1px solid #e2e8f0;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    .result-table th { background: #f8fafc; color: #475569; }
+    .result-table .pass-cell { color: #16a34a; font-weight: 700; }
+    .result-table .fail-cell { color: #dc2626; font-weight: 700; }
+    .retry-btn {
+      padding: 14px 40px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .retry-btn:hover { background: #1d4ed8; }
+    .highlight { background: #fef9c3; padding: 1px 4px; border-radius: 3px; }
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>基本情報技術者試験　模擬試験</h1>
+    <div class="progress-text" id="progressText">問1 / 30</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width:3.3%"></div>
+  </div>
+  <div class="score-bar">
+    正解：<span class="correct-count" id="correctCount">0</span>
+    不正解：<span class="wrong-count" id="wrongCount">0</span>
+    残り：<span id="remainCount">30</span>問
+  </div>
+
+  <div class="body" id="quizBody">
+    <div class="subject-badge" id="subjectBadge">科目A</div>
+    <div class="question-num" id="questionNum">問1</div>
+    <div class="question-text" id="questionText"></div>
+    <div id="questionExtra"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+
+  <div class="result-screen" id="resultScreen"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    subject: "科目A",
+    text: "2進数 <code>1011 0110</code> を16進数に変換した値はどれか。",
+    choices: ["A6", "B6", "B5", "A5"],
+    answer: 1,
+    explanation: `<b>1011 0110</b> を4ビットずつ分割します。<br><br>
+      <table><tr><th>2進数</th><th>計算</th><th>16進数</th></tr>
+      <tr><td>1011</td><td>8+2+1 = 11</td><td>B</td></tr>
+      <tr><td>0110</td><td>4+2 = 6</td><td>6</td></tr></table>
+      よって <b>B6</b>`
+  },
+  {
+    subject: "科目A",
+    text: "2の補数方式で8ビットが表せる整数の範囲はどれか。",
+    choices: ["−128 〜 127", "−127 〜 128", "−128 〜 128", "−127 〜 127"],
+    answer: 0,
+    explanation: `最上位ビットが符号ビットになります。<br><br>
+      <table><tr><th>状態</th><th>ビット列</th><th>値</th></tr>
+      <tr><td>最小値</td><td>1000 0000</td><td>−128</td></tr>
+      <tr><td>最大値</td><td>0111 1111</td><td>+127</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "次の論理式を簡略化したものはどれか。<br><br><code>A・B + A・B̄</code>",
+    choices: ["A", "B", "A + B", "1"],
+    answer: 0,
+    explanation: `分配法則を適用します。<br><br>
+      <b>A・B + A・B̄ = A・(B + B̄) = A・1 = A</b><br><br>
+      <code>B + B̄ = 1</code>（補元の法則）なので残るのは <b>A</b> だけです。`
+  },
+  {
+    subject: "科目A",
+    text: "4ビットのリングカウンタが初期状態 <code>1000</code> のとき、クロックパルスを3回入力した後の状態はどれか。",
+    choices: ["0001", "0010", "0100", "1000"],
+    answer: 0,
+    explanation: `リングカウンタは右にシフトし、最下位ビットが最上位へ循環します。<br><br>
+      <table><tr><th>パルス</th><th>状態</th></tr>
+      <tr><td>初期</td><td>1000</td></tr>
+      <tr><td>1回目</td><td>0100</td></tr>
+      <tr><td>2回目</td><td>0010</td></tr>
+      <tr><td>3回目</td><td><b>0001</b></td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "キャッシュのヒット率0.9、キャッシュアクセス時間10 ns、主記憶アクセス時間100 ns のとき、実効アクセス時間は何 ns か。",
+    choices: ["10", "19", "55", "100"],
+    answer: 1,
+    explanation: `実効アクセス時間 = ヒット率 × キャッシュ時間 + (1−ヒット率) × 主記憶時間<br><br>
+      <b>= 0.9 × 10 + 0.1 × 100 = 9 + 10 = 19 ns</b>`
+  },
+  {
+    subject: "科目A",
+    text: "OSの仮想記憶管理においてスラッシングが発生する主な原因はどれか。",
+    choices: [
+      "CPUのクロック数が低い",
+      "物理メモリが不足し、ページの入替えが頻繁に発生する",
+      "ディスクの回転数が遅い",
+      "キャッシュメモリの容量が不足している"
+    ],
+    answer: 1,
+    explanation: `スラッシングとは、<b>物理メモリ不足</b>によってページフォールトが頻発し、ページの入替え（スワッピング）に大半の時間が費やされ、実質的な処理が進まなくなる現象です。`
+  },
+  {
+    subject: "科目A",
+    text: "「ラウンドロビン方式」の説明として適切なものはどれか。",
+    choices: [
+      "優先度の高いプロセスを常に先に実行する",
+      "各プロセスに一定時間（タイムスライス）を割り当て、順番に実行する",
+      "最も短い実行時間のプロセスを優先して実行する",
+      "プロセスが完了するまで他のプロセスに切り替えない"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>方式</th><th>説明</th></tr>
+      <tr><td>ラウンドロビン</td><td>タイムスライスを均等割当・順番実行（イ）</td></tr>
+      <tr><td>優先度スケジューリング</td><td>優先度の高いプロセスを先に（ア）</td></tr>
+      <tr><td>最短ジョブ優先(SJF)</td><td>実行時間が最短を優先（ウ）</td></tr>
+      <tr><td>ノンプリエンプティブ</td><td>完了まで切り替えなし（エ）</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "第3正規形（3NF）の条件として正しいものはどれか。",
+    choices: [
+      "第1正規形を満たし、すべての非キー属性が主キーに完全関数従属している",
+      "第2正規形を満たし、すべての非キー属性が主キーに推移的関数従属していない",
+      "繰り返し項目が存在しない",
+      "主キーが単一の属性で構成されている"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>正規形</th><th>条件</th></tr>
+      <tr><td>1NF</td><td>繰り返し項目なし</td></tr>
+      <tr><td>2NF</td><td>1NF + 部分関数従属なし</td></tr>
+      <tr><td><b>3NF</b></td><td><b>2NF + 推移的関数従属なし</b></td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: `次のSQL文を実行した結果として返される行数はどれか。<br>
+      <div class="code-block">SELECT DISTINCT department FROM employees WHERE salary &gt; 400000;</div>
+      <table><tr><th>department</th><th>salary</th></tr>
+      <tr><td>営業</td><td>350,000</td></tr>
+      <tr><td>開発</td><td>500,000</td></tr>
+      <tr><td>開発</td><td>600,000</td></tr>
+      <tr><td>人事</td><td>420,000</td></tr>
+      <tr><td>営業</td><td>450,000</td></tr></table>`,
+    choices: ["2行", "3行", "4行", "5行"],
+    answer: 1,
+    explanation: `<code>salary &gt; 400000</code> で絞ると：開発・開発・人事・営業 の4行。<br>
+      <code>DISTINCT department</code> で重複排除：<b>開発・人事・営業</b> → <b>3行</b>`
+  },
+  {
+    subject: "科目A",
+    text: "TCPとUDPを比較した説明として適切なものはどれか。",
+    choices: [
+      "UDPはコネクション型プロトコルであり、信頼性の高い通信を行う",
+      "TCPはコネクションレス型で、リアルタイム通信に適している",
+      "TCPはコネクション型で信頼性の高い通信を行うが、UDPより遅延が大きくなる場合がある",
+      "UDPはフロー制御と輻輳制御を持ち、大容量データ転送に適している"
+    ],
+    answer: 2,
+    explanation: `<table><tr><th></th><th>TCP</th><th>UDP</th></tr>
+      <tr><td>接続</td><td>コネクション型</td><td>コネクションレス型</td></tr>
+      <tr><td>信頼性</td><td>保証あり（再送制御）</td><td>保証なし</td></tr>
+      <tr><td>速度</td><td>遅延大きい</td><td>低遅延</td></tr>
+      <tr><td>用途</td><td>Web・メール</td><td>動画・DNS・VoIP</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "<code>192.168.10.0/24</code> のネットワークで使用可能なホストアドレスの数はどれか。",
+    choices: ["253", "254", "255", "256"],
+    answer: 1,
+    explanation: `/24 = ホスト部8ビット = 2⁸ = 256アドレス<br><br>
+      <table><tr><th>アドレス</th><th>用途</th></tr>
+      <tr><td>192.168.10.0</td><td>ネットワークアドレス（使用不可）</td></tr>
+      <tr><td>192.168.10.1〜254</td><td>ホスト用 ✅</td></tr>
+      <tr><td>192.168.10.255</td><td>ブロードキャスト（使用不可）</td></tr></table>
+      256 − 2 = <b>254ホスト</b>`
+  },
+  {
+    subject: "科目A",
+    text: "公開鍵暗号方式の説明として正しいものはどれか。",
+    choices: [
+      "暗号化と復号に同じ鍵を使用する",
+      "送信者は受信者の公開鍵で暗号化し、受信者は自分の秘密鍵で復号する",
+      "鍵の配送が共通鍵暗号方式より困難である",
+      "処理速度が共通鍵暗号方式より速い"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>手順</th><th>鍵</th></tr>
+      <tr><td>暗号化（送信者）</td><td>受信者の<b>公開鍵</b></td></tr>
+      <tr><td>復号（受信者）</td><td>自分の<b>秘密鍵</b></td></tr></table>
+      公開鍵は誰でも使えるため鍵配送問題を解決できますが、処理速度は共通鍵より<b>遅い</b>です。`
+  },
+  {
+    subject: "科目A",
+    text: "デジタル署名の目的として適切なものはどれか。",
+    choices: [
+      "データの暗号化による盗聴防止",
+      "送信者の正当性（なりすまし防止）とデータの改ざん検出",
+      "データの圧縮による転送効率向上",
+      "不正アクセスの遮断"
+    ],
+    answer: 1,
+    explanation: `送信者が<b>秘密鍵</b>でハッシュ値を暗号化し、受信者が<b>公開鍵</b>で検証します。<br><br>
+      <table><tr><th>目的</th></tr>
+      <tr><td>なりすまし防止（本人確認）</td></tr>
+      <tr><td>改ざん検出（ハッシュ値の一致確認）</td></tr>
+      <tr><td>否認防止</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "オブジェクト指向における「継承」の説明として正しいものはどれか。",
+    choices: [
+      "オブジェクトの内部実装を隠蔽し、外部からはインターフェースのみを公開する",
+      "親クラスの属性や操作を子クラスが引き継ぐ仕組み",
+      "同一のメッセージに対してオブジェクトが異なる振る舞いをする",
+      "複数のオブジェクトを組み合わせて新しいオブジェクトを作る"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>概念</th><th>説明</th></tr>
+      <tr><td>カプセル化</td><td>内部実装の隠蔽（ア）</td></tr>
+      <tr><td><b>継承</b></td><td><b>親クラスの属性・操作を子クラスが引き継ぐ（イ）</b></td></tr>
+      <tr><td>ポリモーフィズム</td><td>同じメッセージへの異なる応答（ウ）</td></tr>
+      <tr><td>集約・コンポジション</td><td>オブジェクトの組み合わせ（エ）</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "「スパイラルモデル」の特徴として適切なものはどれか。",
+    choices: [
+      "要件定義→設計→実装→テストを一方向に進める",
+      "小さい単位で開発・評価を繰り返し、リスクを逐次管理しながら開発を進める",
+      "動作するソフトウェアを短いイテレーションで繰り返しリリースする",
+      "上流工程に戻ることができないため、要件の変更に弱い"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>開発モデル</th><th>特徴</th></tr>
+      <tr><td><b>スパイラル</b></td><td><b>計画→リスク分析→開発→評価を繰り返す（イ）</b></td></tr>
+      <tr><td>ウォーターフォール</td><td>一方向に進む（ア・エ）</td></tr>
+      <tr><td>アジャイル</td><td>短いイテレーションで繰り返しリリース（ウ）</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "UMLクラス図における「依存関係（Dependency）」の説明として正しいものはどれか。",
+    choices: [
+      "一方のクラスが他方のクラスを属性として保持する",
+      "一方のクラスが他方のクラスを継承する",
+      "一方のクラスが他方のクラスを一時的に使用する（メソッドの引数など）",
+      "全体と部分の関係を表す"
+    ],
+    answer: 2,
+    explanation: `<table><tr><th>UML関係</th><th>説明</th></tr>
+      <tr><td>関連（Association）</td><td>属性として保持（ア）</td></tr>
+      <tr><td>汎化（Generalization）</td><td>継承（イ）</td></tr>
+      <tr><td><b>依存（Dependency）</b></td><td><b>一時的使用、点線矢印（ウ）</b></td></tr>
+      <tr><td>集約・合成</td><td>全体と部分（エ）</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "テスト技法の「同値分割法」の説明として適切なものはどれか。",
+    choices: [
+      "入力値の境界となる値を重点的にテストする",
+      "入力領域を同じ性質をもつグループに分割し、各グループの代表値でテストする",
+      "すべてのパスを少なくとも1回通過するようにテストケースを設計する",
+      "条件分岐のすべての組み合わせをテストする"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>技法</th><th>説明</th></tr>
+      <tr><td>境界値分析</td><td>境界付近の値をテスト（ア）</td></tr>
+      <tr><td><b>同値分割</b></td><td><b>同じ処理グループの代表値でテスト（イ）</b></td></tr>
+      <tr><td>パステスト</td><td>全パス網羅（ウ）</td></tr>
+      <tr><td>判定条件網羅</td><td>条件の組合せ（エ）</td></tr></table>`
+  },
+  {
+    subject: "科目A",
+    text: "「クリティカルパス」の説明として正しいものはどれか。",
+    choices: [
+      "プロジェクトでコストが最も高くなる作業経路",
+      "最も多くのリソースを消費する作業の集合",
+      "余裕時間（フロート）がゼロであり、プロジェクト全体の所要期間を決定する経路",
+      "並行して実施可能な作業をまとめた経路"
+    ],
+    answer: 2,
+    explanation: `クリティカルパスは<b>フロート（余裕時間）= 0</b> のタスクを連ねた経路です。<br>
+      この経路上のタスクが1つでも遅れると<b>プロジェクト全体が遅延</b>します。`
+  },
+  {
+    subject: "科目A",
+    text: "情報セキュリティの「機密性（Confidentiality）」の説明として正しいものはどれか。",
+    choices: [
+      "情報が改ざんされていないことを保証する性質",
+      "認可された人だけが情報にアクセスできる性質",
+      "必要なときに情報にアクセスできる性質",
+      "情報の送受信を否定できない性質"
+    ],
+    answer: 1,
+    explanation: `情報セキュリティの3要素（CIA）：<br><br>
+      <table><tr><th>要素</th><th>英語</th><th>内容</th></tr>
+      <tr><td><b>機密性</b></td><td>Confidentiality</td><td><b>権限のある者のみアクセス可能（イ）</b></td></tr>
+      <tr><td>完全性</td><td>Integrity</td><td>改ざんされていないこと（ア）</td></tr>
+      <tr><td>可用性</td><td>Availability</td><td>必要なときにアクセス可能（ウ）</td></tr></table>
+      エは<b>否認防止（Non-repudiation）</b>です。`
+  },
+  {
+    subject: "科目A",
+    text: "「ROI（Return on Investment）」を計算する式として正しいものはどれか。",
+    choices: [
+      "投資額 ÷ 利益 × 100（%）",
+      "（利益 − 投資額）÷ 投資額 × 100（%）",
+      "利益 ÷ 売上高 × 100（%）",
+      "投資額 ÷ 売上高 × 100（%）"
+    ],
+    answer: 1,
+    explanation: `<b>ROI = （利益 − 投資額）÷ 投資額 × 100（%）</b><br><br>
+      例：投資額100万円、利益120万円 → (120−100) ÷ 100 × 100 = <b>20%</b><br><br>
+      ウは<b>売上高利益率</b>の計算式です。`
+  },
+  {
+    subject: "科目B",
+    text: `次の疑似コードを実行したとき、出力される値はどれか。
+      <div class="code-block">x ← 10
+y ← 3
+z ← x mod y
+print(z)</div>`,
+    choices: ["0", "1", "3", "7"],
+    answer: 1,
+    explanation: `<code>mod</code> は割り算の<b>余り</b>を求める演算です。<br><br>
+      10 ÷ 3 = 3 余り <b>1</b>`
+  },
+  {
+    subject: "科目B",
+    text: `次の疑似コードを実行したとき、出力される値はどれか。
+      <div class="code-block">array ← [3, 7, 2, 9, 5]
+sum ← 0
+i ← 0
+while i &lt; 5
+    sum ← sum + array[i]
+    i ← i + 1
+end while
+print(sum)</div>`,
+    choices: ["24", "25", "26", "27"],
+    answer: 2,
+    explanation: `配列の全要素を合計します。<br><br>
+      3 + 7 + 2 + 9 + 5 = <b>26</b>`
+  },
+  {
+    subject: "科目B",
+    text: "バブルソートで <code>[5, 3, 8, 1, 4]</code> を昇順ソートする際、最初のパス終了後の配列はどれか。",
+    choices: ["[1, 3, 4, 5, 8]", "[3, 5, 1, 4, 8]", "[3, 5, 8, 1, 4]", "[1, 3, 5, 4, 8]"],
+    answer: 1,
+    explanation: `隣り合う要素を比較・交換しながら進みます。<br><br>
+      <table><tr><th>比較</th><th>操作</th><th>状態</th></tr>
+      <tr><td>5 と 3</td><td>交換</td><td>[3, 5, 8, 1, 4]</td></tr>
+      <tr><td>5 と 8</td><td>そのまま</td><td>[3, 5, 8, 1, 4]</td></tr>
+      <tr><td>8 と 1</td><td>交換</td><td>[3, 5, 1, 8, 4]</td></tr>
+      <tr><td>8 と 4</td><td>交換</td><td>[3, 5, 1, 4, <b>8</b>]</td></tr></table>
+      1パス目で最大値の <b>8</b> が末尾に確定します。`
+  },
+  {
+    subject: "科目B",
+    text: `次の再帰関数を <code>factorial(5)</code> で呼び出したとき、返される値はどれか。
+      <div class="code-block">function factorial(n)
+    if n &lt;= 1
+        return 1
+    end if
+    return n * factorial(n - 1)
+end function</div>`,
+    choices: ["24", "60", "120", "720"],
+    answer: 2,
+    explanation: `5の階乗（5!）を計算します。<br><br>
+      factorial(5) → 5 × factorial(4) → 5 × 4 × factorial(3) → ...<br><br>
+      5 × 4 × 3 × 2 × 1 = <b>120</b><br><br>
+      ア（24）は 4! の値です。`
+  },
+  {
+    subject: "科目B",
+    text: "スタックに A, B, C をこの順でプッシュした後、2回ポップしたとき、スタックに残っているデータはどれか。",
+    choices: ["A", "B", "C", "スタックは空"],
+    answer: 0,
+    explanation: `スタックは<b>LIFO（後入れ先出し）</b>です。<br><br>
+      <table><tr><th>操作</th><th>スタック（上→下）</th></tr>
+      <tr><td>A, B, C をプッシュ</td><td>C, B, A</td></tr>
+      <tr><td>1回目ポップ（C取り出し）</td><td>B, A</td></tr>
+      <tr><td>2回目ポップ（B取り出し）</td><td><b>A</b></td></tr></table>`
+  },
+  {
+    subject: "科目B",
+    text: "二分探索（バイナリサーチ）を適用できる条件として正しいものはどれか。",
+    choices: [
+      "データが連結リストで格納されている",
+      "データがソート済みの配列に格納されている",
+      "データが重複していない",
+      "データの件数が偶数である"
+    ],
+    answer: 1,
+    explanation: `二分探索は中央値と比較して探索範囲を半分に絞り込む手法です。<br><br>
+      前提条件：<b>データがソート済みであること</b><br><br>
+      計算量は <b>O(log n)</b> で線形探索 O(n) より高速です。`
+  },
+  {
+    subject: "科目B",
+    text: `次のPythonコードを実行したとき、出力されるものはどれか。
+      <div class="code-block">result = []
+for i in range(1, 6):
+    if i % 2 == 0:
+        result.append(i)
+print(result)</div>`,
+    choices: ["[1, 3, 5]", "[2, 4]", "[1, 2, 3, 4, 5]", "[2, 4, 6]"],
+    answer: 1,
+    explanation: `<code>range(1, 6)</code> は 1〜5 を生成します（6は含まない）。<br><br>
+      <table><tr><th>i</th><th>i % 2 == 0</th><th>追加</th></tr>
+      <tr><td>1</td><td>False</td><td>—</td></tr>
+      <tr><td>2</td><td>True</td><td>✅</td></tr>
+      <tr><td>3</td><td>False</td><td>—</td></tr>
+      <tr><td>4</td><td>True</td><td>✅</td></tr>
+      <tr><td>5</td><td>False</td><td>—</td></tr></table>
+      エ（[2, 4, 6]）は <code>range(1, 7)</code> のときの結果です。`
+  },
+  {
+    subject: "科目B",
+    text: `次のPythonコードを実行した結果はどれか。
+      <div class="code-block">def func(lst):
+    lst.append(99)
+
+my_list = [1, 2, 3]
+func(my_list)
+print(my_list)</div>`,
+    choices: ["[1, 2, 3]", "[1, 2, 3, 99]", "エラーが発生する", "[99, 1, 2, 3]"],
+    answer: 1,
+    explanation: `Pythonのリストはミュータブル（変更可能）なオブジェクトです。<br>
+      関数に渡すと<b>参照渡し</b>になるため、関数内での変更が元のリストに反映されます。`
+  },
+  {
+    subject: "科目B",
+    text: "線形探索の最悪計算量（ビッグオー記法）はどれか。",
+    choices: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+    answer: 2,
+    explanation: `<table><tr><th>計算量</th><th>アルゴリズム例</th></tr>
+      <tr><td>O(1)</td><td>配列のインデックスアクセス</td></tr>
+      <tr><td>O(log n)</td><td>二分探索</td></tr>
+      <tr><td><b>O(n)</b></td><td><b>線形探索</b></td></tr>
+      <tr><td>O(n²)</td><td>バブルソート</td></tr></table>
+      先頭から順に探すため、最悪の場合は全要素を走査します。`
+  },
+  {
+    subject: "科目B",
+    text: `次のコードに関する説明として正しいものはどれか。
+      <div class="code-block">class Animal:
+    def __init__(self, name):
+        self.name = name
+    def speak(self):
+        return "..."
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name}がワンと鳴いた"</div>`,
+    choices: [
+      "Dog クラスは speak メソッドを持たない",
+      "Dog クラスの speak は Animal クラスの speak をオーバーライドしている",
+      "Dog インスタンスは name 属性を持たない",
+      "Animal クラスをインスタンス化することはできない"
+    ],
+    answer: 1,
+    explanation: `<table><tr><th>選択肢</th><th>正誤</th><th>理由</th></tr>
+      <tr><td>ア</td><td>✗</td><td>Dog は独自の speak を持つ</td></tr>
+      <tr><td><b>イ</b></td><td><b>✅</b></td><td><b>speak をオーバーライドしている</b></td></tr>
+      <tr><td>ウ</td><td>✗</td><td>name は Animal.__init__ から継承される</td></tr>
+      <tr><td>エ</td><td>✗</td><td>抽象クラスではないのでインスタンス化できる</td></tr></table>`
+  }
+];
+
+const labels = ["ア", "イ", "ウ", "エ"];
+let current = 0;
+let correct = 0;
+let wrong = 0;
+let answered = false;
+
+function render() {
+  const q = questions[current];
+  document.getElementById("subjectBadge").textContent = q.subject;
+  document.getElementById("questionNum").textContent = `問${current + 1}`;
+  document.getElementById("questionText").innerHTML = q.text;
+  document.getElementById("questionExtra").innerHTML = "";
+  document.getElementById("progressText").textContent = `問${current + 1} / ${questions.length}`;
+  document.getElementById("progressBar").style.width = `${((current + 1) / questions.length) * 100}%`;
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("wrongCount").textContent = wrong;
+  document.getElementById("remainCount").textContent = questions.length - current;
+
+  const choicesEl = document.getElementById("choices");
+  choicesEl.innerHTML = "";
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `<span class="label">${labels[i]}</span><span>${c}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const btns = document.querySelectorAll(".choice-btn");
+  btns.forEach(b => b.disabled = true);
+
+  const isCorrect = idx === q.answer;
+  if (isCorrect) {
+    correct++;
+    btns[idx].classList.add("correct");
+  } else {
+    wrong++;
+    btns[idx].classList.add("wrong");
+    btns[q.answer].classList.add("reveal");
+  }
+
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("wrongCount").textContent = wrong;
+
+  const feedback = document.getElementById("feedback");
+  feedback.className = `feedback ${isCorrect ? "correct" : "wrong"}`;
+  feedback.innerHTML = `
+    <div class="feedback-title">${isCorrect ? "✅ 正解！" : `❌ 不正解　正解は <b>${labels[q.answer]}（${q.choices[q.answer]}）</b>`}</div>
+    ${q.explanation}
+  `;
+  feedback.style.display = "block";
+
+  const nextBtn = document.getElementById("nextBtn");
+  nextBtn.style.display = "block";
+  nextBtn.textContent = current + 1 < questions.length ? "次の問題へ →" : "結果を見る";
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResult();
+  } else {
+    render();
+  }
+}
+
+function showResult() {
+  document.getElementById("quizBody").style.display = "none";
+  const resultEl = document.getElementById("resultScreen");
+  resultEl.style.display = "block";
+
+  const scoreA = questions.slice(0, 20).reduce((acc, q, i) => acc, { correct: 0, total: 20 });
+  let correctA = 0, correctB = 0;
+
+  // Re-calculate (we track global correct/wrong, need per-subject)
+  // Simple: show total only
+  const total = correct;
+  const pct = Math.round((total / questions.length) * 100);
+  const pass = pct >= 60;
+
+  resultEl.innerHTML = `
+    <div class="result-circle ${pass ? "pass" : "fail"}">
+      <div class="big">${pct}%</div>
+      <div class="small">${total} / ${questions.length}問</div>
+    </div>
+    <div class="result-title">${pass ? "合格圏内です！" : "もう少し復習しましょう"}</div>
+    <div class="result-sub">合格ライン：正答率 60% 以上</div>
+    <table class="result-table">
+      <tr><th>問題数</th><th>正解</th><th>不正解</th><th>正答率</th><th>判定</th></tr>
+      <tr>
+        <td>${questions.length}問</td>
+        <td class="pass-cell">${correct}</td>
+        <td class="fail-cell">${wrong}</td>
+        <td>${pct}%</td>
+        <td class="${pass ? "pass-cell" : "fail-cell"}">${pass ? "合格圏" : "要復習"}</td>
+      </tr>
+    </table>
+    <button class="retry-btn" onclick="restart()">もう一度挑戦する</button>
+  `;
+}
+
+function restart() {
+  current = 0;
+  correct = 0;
+  wrong = 0;
+  answered = false;
+  document.getElementById("quizBody").style.display = "block";
+  document.getElementById("resultScreen").style.display = "none";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
